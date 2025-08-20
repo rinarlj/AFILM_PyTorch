@@ -3,6 +3,7 @@ from models.tfilm import TFiLMModel
 from utils import upsample_wav
 import os
 import argparse
+import torch
 
 def make_parser():
     parser = argparse.ArgumentParser()
