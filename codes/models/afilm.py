@@ -1,8 +1,8 @@
-# import torch
-# import torch.nn as nn
-# import torch.nn.functional as F
-# from .layers.subpixel import SubPixel1D
-# from .layers.transformer import TransformerBlock
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from .layers.subpixel import SubPixel1D
+from .layers.transformer import TransformerBlock
 
 class AFiLM(nn.Module):
     def __init__(self, n_step, block_size, n_filters):
