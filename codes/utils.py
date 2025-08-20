@@ -37,7 +37,47 @@ def spline_up(x_lr, r):
     x_sp = interpolate.splev(i_hr, f)
 
     return x_sp
+    
+def calculate_snr(original, reconstructed):
+    """
+    Calculate Signal-to-Noise Ratio (SNR) in dB.
+    Higher is better.
+    """
+    # Ensure we have numpy arrays and flatten them
+    original = np.array(original).flatten()
+    reconstructed = np.array(reconstructed).flatten()
+    
+    # Calculate noise
+    noise = original - reconstructed
+    
+    # Calculate powers
+    signal_power = np.sum(original ** 2)
+    noise_power = np.sum(noise ** 2)
+    
+    # Avoid division by zero
+    if noise_power == 0:
+        return float('inf')
+    
+    # Calculate SNR in dB
+    snr = 10 * np.log10(signal_power / noise_power)
+    return snr
 
+def calculate_lsd(original, reconstructed, n_fft=2048, hop_length=512):
+    """
+    Calculate Log-Spectral Distance (LSD) in dB.
+    Lower is better.
+    """
+    # Compute STFT
+    S_orig = np.abs(librosa.stft(original, n_fft=n_fft, hop_length=hop_length))
+    S_recon = np.abs(librosa.stft(reconstructed, n_fft=n_fft, hop_length=hop_length))
+    
+    # Convert to log scale
+    log_S_orig = np.log10(np.maximum(S_orig, 1e-8))
+    log_S_recon = np.log10(np.maximum(S_recon, 1e-8))
+    
+    # Calculate LSD
+    lsd = np.sqrt(np.mean((log_S_orig - log_S_recon) ** 2))
+    return lsd
 
 def upsample_wav(wav, args, model, save_spectrum=False):
     """Upsample a wav file using the trained model."""
@@ -95,6 +135,20 @@ def upsample_wav(wav, args, model, save_spectrum=False):
     sf.write(outname + '.lr.wav', x_lr_t, int(fs / args.r))
     sf.write(outname + '.hr.wav', x_hr, fs)
     sf.write(outname + '.pr.wav', x_pr, fs)
+
+    try:
+        # Calculate metrics
+        snr_value = calculate_snr(x_hr, x_pr)
+        lsd_value = calculate_lsd(x_hr, x_pr)
+        
+        # Print metrics
+        print(f"File: {os.path.basename(wav)}")
+        print(f"  → SNR: {snr_value:.2f} dB")
+        print(f"  → LSD: {lsd_value:.4f}")
+        print("-" * 40)
+        
+    except Exception as e:
+        print(f"Error calculating metrics for {wav}: {str(e)}")
 
     if save_spectrum:
         # Save the spectrum
