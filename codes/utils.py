@@ -41,24 +41,29 @@ def spline_up(x_lr, r):
 def calculate_snr(original, reconstructed):
     """
     Calculate Signal-to-Noise Ratio (SNR) in dB.
-    Higher is better.
+    Higher values indicate better reconstruction quality.
     """
-    # Ensure we have numpy arrays and flatten them
-    original = np.array(original).flatten()
-    reconstructed = np.array(reconstructed).flatten()
-    
-    # Calculate noise
+    # Convert to float and flatten
+    original = np.asarray(original, dtype=np.float64).flatten()
+    reconstructed = np.asarray(reconstructed, dtype=np.float64).flatten()
+
+    # Ensure same length
+    min_len = min(len(original), len(reconstructed))
+    original = original[:min_len]
+    reconstructed = reconstructed[:min_len]
+
+    # Compute noise
     noise = original - reconstructed
-    
-    # Calculate powers
-    signal_power = np.sum(original ** 2)
-    noise_power = np.sum(noise ** 2)
-    
-    # Avoid division by zero
+
+    # Use mean power for numerical stability
+    signal_power = np.mean(original ** 2)
+    noise_power = np.mean(noise ** 2)
+
+    # Handle perfect reconstruction case
     if noise_power == 0:
         return float('inf')
-    
-    # Calculate SNR in dB
+
+    # Compute SNR in dB
     snr = 10 * np.log10(signal_power / noise_power)
     return snr
 
