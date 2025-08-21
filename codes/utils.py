@@ -230,16 +230,16 @@ def upsample_wav(wav, args, model, save_spectrum=False):
     #     save_spectrum(S, outfile=outname + '.hr.png')
     #     S = get_spectrum(x_lr_t, n_fft=int(2048/args.r))
     #     save_spectrum(S, outfile=outname + '.lr.png')
-    if evaluate_metrics:
-        print(f"\nEvaluating metrics for: {os.path.basename(wav)}")
-        metrics = evaluate_audio_metrics(x_hr, x_pr)
-        print("-" * 50)
-        for metric_name, metric_value in metrics.items():
-            print(f"{metric_name:<15}: {metric_value:8.4f}")
-        print("-" * 50)
-        
-        # Return metrics for aggregation
-        return metrics
+    
+    print(f"\nEvaluating metrics for: {os.path.basename(wav)}")
+    metrics = evaluate_audio_metrics(x_hr, x_pr)
+    print("-" * 50)
+    for metric_name, metric_value in metrics.items():
+        print(f"{metric_name:<15}: {metric_value:8.4f}")
+    print("-" * 50)
+    
+    # Return metrics for aggregation
+    
 
     if save_spectrum:
         # Save the spectrum
@@ -250,7 +250,7 @@ def upsample_wav(wav, args, model, save_spectrum=False):
         S = get_spectrum(x_lr_t, n_fft=int(2048/args.r))
         save_spectrum(S, outfile=outname + '.lr.png')
 
-    return None
+    return metrics
 
 def get_spectrum(x, n_fft=2048):
     """Compute spectrum using STFT."""
