@@ -151,9 +151,11 @@ def upsample_wav(wav, args, model, save_spectrum=False):
         print(f"  → SNR: {snr_value:.2f} dB")
         print(f"  → LSD: {lsd_value:.4f}")
         print("-" * 40)
+        return snr_value, lsd_value
         
     except Exception as e:
         print(f"Error calculating metrics for {wav}: {str(e)}")
+        return None, None
 
     if save_spectrum:
         # Save the spectrum
