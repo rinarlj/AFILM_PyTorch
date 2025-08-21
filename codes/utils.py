@@ -147,10 +147,10 @@ def upsample_wav(wav, args, model, save_spectrum=False):
         lsd_value = calculate_lsd(x_hr, x_pr)
         
         # Print metrics
-        print(f"File: {os.path.basename(wav)}")
-        print(f"  → SNR: {snr_value:.2f} dB")
-        print(f"  → LSD: {lsd_value:.4f}")
-        print("-" * 40)
+        # print(f"File: {os.path.basename(wav)}")
+        # print(f"  → SNR: {snr_value:.2f} dB")
+        # print(f"  → LSD: {lsd_value:.4f}")
+        # print("-" * 40)
         return snr_value, lsd_value
         
     except Exception as e:
