@@ -102,7 +102,7 @@ def test(args):
                 #     snr_list.append(snr_value)
                 #     lsd_list.append(lsd_value)
                 try:
-                    metrics = upsample_wav(wav_file, args, model, save_spectrum=False, evaluate_metrics=True)
+                    metrics = upsample_wav(wav_file, args, model, save_spectrum=False)
                     if metrics:
                         all_metrics.append(metrics)
                         processed_files.append(wav_file)
