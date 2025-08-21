@@ -4,6 +4,7 @@ from utils import upsample_wav
 import os
 import argparse
 import torch
+import numpy as np
 
 def make_parser():
     parser = argparse.ArgumentParser()
