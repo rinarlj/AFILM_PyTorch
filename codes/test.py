@@ -113,9 +113,9 @@ def test(args):
                 std_lsd = np.std(lsd_list)
 
                 print("\n" + "-" * 20)
-                print(f"Evaluation Summary ({len(snr_list)} files):")
-                print(f"Average SNR: {mean_snr:.2f} dB ± {std_snr:.2f}")
-                print(f"Average LSD: {mean_lsd:.4f} ± {std_lsd:.4f}")
+                print(f"Evaluation Summary :")
+                print(f"Average SNR: {mean_snr:.2f} dB")
+                print(f"Average LSD: {mean_lsd:.4f}")
                 print("-" * 20)
         
     else:
