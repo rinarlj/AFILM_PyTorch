@@ -87,13 +87,34 @@ def test(args):
             with open(args.wav_file_list, 'r') as f:
                 wav_files = [line.strip() for line in f.readlines() if line.strip()]
 
+            snr_list = []
+            lsd_list = []
+
             for i, wav_file in enumerate(wav_files):
                 print(f"Processing file {i+1}/{len(wav_files)}: {wav_file}")
                 try:
-                    upsample_wav(wav_file, args, model)
+                    # Modify upsample_wav to return SNR and LSD
+                    snr_value, lsd_value = upsample_wav(wav_file, args, model)
+                    
+                    snr_list.append(snr_value)
+                    lsd_list.append(lsd_value)
                     print(f"Successfully processed: {wav_file}")
+
+                
                 except Exception as e:
                     print(f"Error processing {wav_file}: {str(e)}")
+
+            if snr_list and lsd_list:
+                mean_snr = np.mean(snr_list)
+                std_snr = np.std(snr_list)
+                mean_lsd = np.mean(lsd_list)
+                std_lsd = np.std(lsd_list)
+
+                print("\n" + "-" * 20)
+                print(f"Evaluation Summary ({len(snr_list)} files):")
+                print(f"Average SNR: {mean_snr:.2f} dB ± {std_snr:.2f}")
+                print(f"Average LSD: {mean_lsd:.4f} ± {std_lsd:.4f}")
+                print("-" * 20)
     else:
         print("No wav file list provided. Use --wav-file-list to specify files to process.")
 
