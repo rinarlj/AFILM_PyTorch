@@ -7,71 +7,6 @@ from scipy import interpolate
 import torch
 from matplotlib import pyplot as plt
 from sklearn.metrics import mean_squared_error, mean_absolute_error
-from scipy.stats import pearsonr
-
-# Add these functions at the end of utils.py
-
-def calculate_snr(signal_true, signal_pred):
-    """Calculate Signal-to-Noise Ratio (SNR) in dB."""
-    signal_power = np.mean(signal_true ** 2)
-    noise_power = np.mean((signal_true - signal_pred) ** 2)
-    
-    if noise_power == 0:
-        return float('inf')
-    
-    snr_db = 10 * np.log10(signal_power / noise_power)
-    return snr_db
-
-
-def calculate_lsd(signal_true, signal_pred, n_fft=2048, hop_length=512):
-    """Calculate Log-Spectral Distance (LSD)."""
-    # Compute spectrograms
-    stft_true = librosa.stft(signal_true, n_fft=n_fft, hop_length=hop_length)
-    stft_pred = librosa.stft(signal_pred, n_fft=n_fft, hop_length=hop_length)
-    
-    # Convert to magnitude spectra
-    mag_true = np.abs(stft_true)
-    mag_pred = np.abs(stft_pred)
-    
-    # Add small epsilon to avoid log(0)
-    eps = 1e-10
-    mag_true = np.maximum(mag_true, eps)
-    mag_pred = np.maximum(mag_pred, eps)
-    
-    # Calculate LSD
-    log_mag_true = np.log10(mag_true)
-    log_mag_pred = np.log10(mag_pred)
-    
-    lsd = np.sqrt(np.mean((log_mag_true - log_mag_pred) ** 2))
-    return lsd
-
-
-def evaluate_audio_metrics(hr_audio, pr_audio):
-    """Calculate evaluation metrics between high-res and predicted audio."""
-    # Ensure same length
-    min_len = min(len(hr_audio), len(pr_audio))
-    hr_audio = hr_audio[:min_len]
-    pr_audio = pr_audio[:min_len]
-    
-    metrics = {}
-    
-    # Time-domain metrics
-    metrics['MSE'] = mean_squared_error(hr_audio, pr_audio)
-    metrics['RMSE'] = np.sqrt(metrics['MSE'])
-    metrics['MAE'] = mean_absolute_error(hr_audio, pr_audio)
-    metrics['SNR_dB'] = calculate_snr(hr_audio, pr_audio)
-    
-    # Correlation
-    if len(hr_audio) > 1:
-        correlation, _ = pearsonr(hr_audio, pr_audio)
-        metrics['Correlation'] = correlation
-    else:
-        metrics['Correlation'] = 0
-    
-    # Frequency-domain metrics
-    metrics['LSD'] = calculate_lsd(hr_audio, pr_audio)
-    
-    return metrics
 
 def load_h5(h5_path):
     """Load H5 dataset and return as PyTorch tensors."""
@@ -103,51 +38,51 @@ def spline_up(x_lr, r):
 
     return x_sp
     
-# def calculate_snr(original, reconstructed):
-#     """
-#     Calculate Signal-to-Noise Ratio (SNR) in dB.
-#     Higher values indicate better reconstruction quality.
-#     """
-#     # Convert to float and flatten
-#     original = np.asarray(original, dtype=np.float64).flatten()
-#     reconstructed = np.asarray(reconstructed, dtype=np.float64).flatten()
+def calculate_snr(original, reconstructed):
+    """
+    Calculate Signal-to-Noise Ratio (SNR) in dB.
+    Higher values indicate better reconstruction quality.
+    """
+    # Convert to float and flatten
+    original = np.asarray(original, dtype=np.float64).flatten()
+    reconstructed = np.asarray(reconstructed, dtype=np.float64).flatten()
 
-#     # Ensure same length
-#     min_len = min(len(original), len(reconstructed))
-#     original = original[:min_len]
-#     reconstructed = reconstructed[:min_len]
+    # Ensure same length
+    min_len = min(len(original), len(reconstructed))
+    original = original[:min_len]
+    reconstructed = reconstructed[:min_len]
 
-#     # Compute noise
-#     noise = original - reconstructed
+    # Compute noise
+    noise = original - reconstructed
 
-#     # Use mean power for numerical stability
-#     signal_power = np.mean(original ** 2)
-#     noise_power = np.mean(noise ** 2)
+    # Use mean power for numerical stability
+    signal_power = np.mean(original ** 2)
+    noise_power = np.mean(noise ** 2)
 
-#     # Handle perfect reconstruction case
-#     if noise_power == 0:
-#         return float('inf')
+    # Handle perfect reconstruction case
+    if noise_power == 0:
+        return float('inf')
 
-#     # Compute SNR in dB
-#     snr = 10 * np.log10(signal_power / noise_power)
-#     return snr
+    # Compute SNR in dB
+    snr = 10 * np.log10(signal_power / noise_power)
+    return snr
 
-# def calculate_lsd(original, reconstructed, n_fft=2048, hop_length=512):
-#     """
-#     Calculate Log-Spectral Distance (LSD) in dB.
-#     Lower is better.
-#     """
-#     # Compute STFT
-#     S_orig = np.abs(librosa.stft(original, n_fft=n_fft, hop_length=hop_length))
-#     S_recon = np.abs(librosa.stft(reconstructed, n_fft=n_fft, hop_length=hop_length))
+def calculate_lsd(original, reconstructed, n_fft=2048, hop_length=512):
+    """
+    Calculate Log-Spectral Distance (LSD) in dB.
+    Lower is better.
+    """
+    # Compute STFT
+    S_orig = np.abs(librosa.stft(original, n_fft=n_fft, hop_length=hop_length))
+    S_recon = np.abs(librosa.stft(reconstructed, n_fft=n_fft, hop_length=hop_length))
     
-#     # Convert to log scale
-#     log_S_orig = np.log10(np.maximum(S_orig, 1e-8))
-#     log_S_recon = np.log10(np.maximum(S_recon, 1e-8))
+    # Convert to log scale
+    log_S_orig = np.log10(np.maximum(S_orig, 1e-8))
+    log_S_recon = np.log10(np.maximum(S_recon, 1e-8))
     
-#     # Calculate LSD
-#     lsd = np.sqrt(np.mean((log_S_orig - log_S_recon) ** 2))
-#     return lsd
+    # Calculate LSD
+    lsd = np.sqrt(np.mean((log_S_orig - log_S_recon) ** 2))
+    return lsd
 
 def upsample_wav(wav, args, model, save_spectrum=False):
     """Upsample a wav file using the trained model."""
@@ -206,40 +141,21 @@ def upsample_wav(wav, args, model, save_spectrum=False):
     sf.write(outname + '.hr.wav', x_hr, fs)
     sf.write(outname + '.pr.wav', x_pr, fs)
 
-    # try:
-    #     # Calculate metrics
-    #     snr_value = calculate_snr(x_hr, x_pr)
-    #     lsd_value = calculate_lsd(x_hr, x_pr)
+    try:
+        # Calculate metrics
+        snr_value = calculate_snr(x_hr, x_pr)
+        lsd_value = calculate_lsd(x_hr, x_pr)
         
-    #     # Print metrics
-    #     print(f"File: {os.path.basename(wav)}")
-    #     print(f"  → SNR: {snr_value:.2f} dB")
-    #     print(f"  → LSD: {lsd_value:.4f}")
-    #     print("-" * 40)
-    #     return snr_value, lsd_value
+        # Print metrics
+        print(f"File: {os.path.basename(wav)}")
+        print(f"  → SNR: {snr_value:.2f} dB")
+        print(f"  → LSD: {lsd_value:.4f}")
+        print("-" * 40)
+        return snr_value, lsd_value
         
-    # except Exception as e:
-    #     print(f"Error calculating metrics for {wav}: {str(e)}")
-    #     return None, None
-
-    # if save_spectrum:
-    #     # Save the spectrum
-    #     S = get_spectrum(x_pr, n_fft=2048)
-    #     save_spectrum(S, outfile=outname + '.pr.png')
-    #     S = get_spectrum(x_hr, n_fft=2048)
-    #     save_spectrum(S, outfile=outname + '.hr.png')
-    #     S = get_spectrum(x_lr_t, n_fft=int(2048/args.r))
-    #     save_spectrum(S, outfile=outname + '.lr.png')
-    
-    print(f"\nEvaluating metrics for: {os.path.basename(wav)}")
-    metrics = evaluate_audio_metrics(x_hr, x_pr)
-    print("-" * 50)
-    for metric_name, metric_value in metrics.items():
-        print(f"{metric_name:<15}: {metric_value:8.4f}")
-    print("-" * 50)
-    
-    # Return metrics for aggregation
-    
+    except Exception as e:
+        print(f"Error calculating metrics for {wav}: {str(e)}")
+        return None, None
 
     if save_spectrum:
         # Save the spectrum
@@ -250,7 +166,6 @@ def upsample_wav(wav, args, model, save_spectrum=False):
         S = get_spectrum(x_lr_t, n_fft=int(2048/args.r))
         save_spectrum(S, outfile=outname + '.lr.png')
 
-    return metrics
 
 def get_spectrum(x, n_fft=2048):
     """Compute spectrum using STFT."""
