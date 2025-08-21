@@ -88,64 +88,36 @@ def test(args):
             with open(args.wav_file_list, 'r') as f:
                 wav_files = [line.strip() for line in f.readlines() if line.strip()]
 
-            # snr_list = []
-            # lsd_list = []
-            all_metrics = []
-            processed_files = []
+            snr_list = []
+            lsd_list = []
+
 
             for i, wav_file in enumerate(wav_files):
                 print(f"Processing file {i+1}/{len(wav_files)}: {wav_file}")
-                # try:
-                #     # Modify upsample_wav to return SNR and LSD
-                #     #snr_value, lsd_value = upsample_wav(wav_file, args, model)
-                    
-                #     snr_list.append(snr_value)
-                #     lsd_list.append(lsd_value)
                 try:
-                    metrics = upsample_wav(wav_file, args, model, save_spectrum=False)
-                    if metrics:
-                        all_metrics.append(metrics)
-                        processed_files.append(wav_file)
-                    print(f"Successfully processed: {wav_file}")
+                    # Modify upsample_wav to return SNR and LSD
+                    snr_value, lsd_value = upsample_wav(wav_file, args, model)
+                    
+                    snr_list.append(snr_value)
+                    lsd_list.append(lsd_value)
+                
 
                 
                 except Exception as e:
                     print(f"Error processing {wav_file}: {str(e)}")
 
-            # if snr_list and lsd_list:
-            #     mean_snr = np.mean(snr_list)
-            #     std_snr = np.std(snr_list)
-            #     mean_lsd = np.mean(lsd_list)
-            #     std_lsd = np.std(lsd_list)
+            if snr_list and lsd_list:
+                mean_snr = np.mean(snr_list)
+                std_snr = np.std(snr_list)
+                mean_lsd = np.mean(lsd_list)
+                std_lsd = np.std(lsd_list)
 
-            #     print("\n" + "-" * 20)
-            #     print(f"Evaluation Summary ({len(snr_list)} files):")
-            #     print(f"Average SNR: {mean_snr:.2f} dB ± {std_snr:.2f}")
-            #     print(f"Average LSD: {mean_lsd:.4f} ± {std_lsd:.4f}")
-            #     print("-" * 20)
-        if all_metrics:
-            print("\n" + "="*60)
-            print("OVERALL EVALUATION SUMMARY")
-            print("="*60)
-            print(f"Total files processed: {len(all_metrics)}")
-            
-            # Calculate average metrics
-            avg_metrics = {}
-            for metric_name in all_metrics[0].keys():
-                values = [m[metric_name] for m in all_metrics if not np.isnan(m[metric_name])]
-                if values:
-                    avg_metrics[metric_name] = {
-                        'mean': np.mean(values),
-                        'std': np.std(values),
-                        'min': np.min(values),
-                        'max': np.max(values)
-                    }
-            
-            print(f"\nAVERAGE METRICS:")
-            print("-" * 40)
-            for metric_name, stats in avg_metrics.items():
-                print(f"{metric_name:<15}: {stats['mean']:8.4f} ± {stats['std']:6.4f} "
-                      f"(min: {stats['min']:6.4f}, max: {stats['max']:6.4f})")
+                print("\n" + "-" * 20)
+                print(f"Evaluation Summary ({len(snr_list)} files):")
+                print(f"Average SNR: {mean_snr:.2f} dB ± {std_snr:.2f}")
+                print(f"Average LSD: {mean_lsd:.4f} ± {std_lsd:.4f}")
+                print("-" * 20)
+        
     else:
         print("No wav file list provided. Use --wav-file-list to specify files to process.")
 
