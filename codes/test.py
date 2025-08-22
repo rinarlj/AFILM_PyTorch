@@ -100,9 +100,7 @@ def test(args):
                     
                     snr_list.append(snr_value)
                     lsd_list.append(lsd_value)
-                
-
-                
+                    print(f"Successfully processed: {wav_file}")
                 except Exception as e:
                     print(f"Error processing {wav_file}: {str(e)}")
 
