@@ -16,7 +16,7 @@ def make_parser():
         help='model to train')
     train_parser.add_argument('--train', required=True,
         help='path to h5 archive of training patches')
-    train_parser.add_argument('--val', required=True,
+    train_parser.add_argument('--val', required=False,
         help='path to h5 archive of validation set patches')
     train_parser.add_argument('-e', '--epochs', type=int, default=20,
         help='number of epochs to train')
