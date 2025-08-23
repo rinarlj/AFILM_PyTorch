@@ -53,7 +53,7 @@ class CustomCheckpoint:
 
 def train(args):
     X_train, Y_train = load_h5(args.train)
-    X_val, Y_val = load_h5(args.val)
+    #X_val, Y_val = load_h5(args.val)
 
     model = get_model(args)
 
