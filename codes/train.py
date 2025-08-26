@@ -35,6 +35,7 @@ def make_parser():
     train_parser.add_argument('--r', type=int, default=4, help='upscaling factor')
     train_parser.add_argument('--pool_size', type=int, default=4, help='size of pooling window')
     train_parser.add_argument('--strides', type=int, default=4, help='pooling stide')
+    parser.add_argument('--pretrained_weights', type=str, default=None, help='Path to pretrained weights to continue training')
     return train_parser
 
 
@@ -57,7 +58,7 @@ def train(args):
 
     model = get_model(args)
 
-    # Équivalent PyTorch de keras.optimizers.Adam
+    # PyTorch equivalent of keras.optimizers.Adam
     if args.alg.lower() == 'adam':
         opt = optim.Adam(model.parameters(), lr=args.lr)
     else:
@@ -65,15 +66,14 @@ def train(args):
 
     model_checkpoint_callback = CustomCheckpoint(file_path=args.save_path)
 
-    # Équivalent de model.compile() - définir loss et métriques
+    # Equivalent of model.compile() - define loss and metrics
     criterion = nn.MSELoss()
 
-    # Équivalent de model.fit() mais avec une boucle d'entraînement manuelle
-    # pour rester fidèle à la structure simple de l'original
+    # Equivalent of model.fit() but with a manual training loop
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = model.to(device)
 
-    # Créer les DataLoaders (équivalent des tensors TF)
+    # Create DataLoaders (equivalent to TF tensors)
     train_dataset = TensorDataset(X_train, Y_train)
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
 
@@ -93,7 +93,7 @@ def train(args):
             loss.backward()
             opt.step()
 
-            # Calcul RMSE (équivalent de tf.keras.metrics.RootMeanSquaredError)
+            # Compute RMSE (equivalent to tf.keras.metrics.RootMeanSquaredError)
             with torch.no_grad():
                 rmse = torch.sqrt(criterion(output, batch_target))
                 epoch_rmse += rmse.item()
@@ -101,13 +101,13 @@ def train(args):
             epoch_loss += loss.item()
             num_batches += 1
 
-        # Logs similaires à TensorFlow
+        # Logs similar to TensorFlow
         logs = {
             'loss': epoch_loss / num_batches,
             'root_mean_squared_error': epoch_rmse / num_batches
         }
 
-        # Callback équivalent
+        # Equivalent callback
         model_checkpoint_callback.on_epoch_end(model, opt, epoch, logs)
 
         print(f'Epoch {epoch+1}/{args.epochs} - loss: {logs["loss"]:.4f} - rmse: {logs["root_mean_squared_error"]:.4f}')
