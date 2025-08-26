@@ -35,7 +35,7 @@ def make_parser():
     train_parser.add_argument('--r', type=int, default=4, help='upscaling factor')
     train_parser.add_argument('--pool_size', type=int, default=4, help='size of pooling window')
     train_parser.add_argument('--strides', type=int, default=4, help='pooling stide')
-    parser.add_argument('--pretrained_weights', type=str, default=None, help='Path to pretrained weights to continue training')
+    train_parser.add_argument('--pretrained_weights', type=str, default=None, help='Path to pretrained weights to continue training')
     return train_parser
 
 
@@ -57,7 +57,18 @@ def train(args):
     #X_val, Y_val = load_h5(args.val)
 
     model = get_model(args)
-
+    if args.pretrained_weights:
+        print(f"Loading pretrained weights from {args.pretrained_weights}")
+        checkpoint = torch.load(args.pretrained_weights)
+        model.load_state_dict(checkpoint['model_state_dict'])
+        
+        # load optimizer if available
+        if 'optimizer_state_dict' in checkpoint:
+            opt.load_state_dict(checkpoint['optimizer_state_dict'])
+            print("Optimizer state also loaded")
+        else:
+            print("Only model weights loaded (no optimizer state)")
+            
     # PyTorch equivalent of keras.optimizers.Adam
     if args.alg.lower() == 'adam':
         opt = optim.Adam(model.parameters(), lr=args.lr)
