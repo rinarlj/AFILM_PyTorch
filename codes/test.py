@@ -93,7 +93,7 @@ def test(args):
 
 
             for i, wav_file in enumerate(wav_files):
-                print(f"Processing file {i+1}/{len(wav_files)}: {wav_file}")
+                # print(f"Processing file {i+1}/{len(wav_files)}: {wav_file}")
                 try:
                     # Modify upsample_wav to return SNR and LSD
                     snr_value, lsd_value = upsample_wav(wav_file, args, model)
