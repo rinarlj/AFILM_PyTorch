@@ -1,1 +1,1 @@
-PyTorch implementation of [this repo]([https://exemple.com](https://github.com/ncarraz/AFILM))
+PyTorch implementation of [this repo](https://github.com/ncarraz/AFILM)
